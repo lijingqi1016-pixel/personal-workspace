@@ -210,9 +210,9 @@ export default function CalendarWidget() {
                 <span style={{ fontSize: 10, color: '#C7C7CC', flexShrink: 0 }}>
                   {item.type === 'todo' ? '待办' : '事项'}
                 </span>
-                {'id' in item && typeof (item as { id?: number }).id === 'number' && (
+                {'id' in item && typeof (item as { id?: string }).id === 'string' && (
                   <button
-                    onClick={() => removeEvent((item as { id: number }).id)}
+                    onClick={() => removeEvent((item as { id: string }).id)}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#C7C7CC', padding: 0 }}
                   >
                     <X size={11} />

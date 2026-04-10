@@ -16,7 +16,7 @@ export default function BookmarkWidget() {
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
-  const [editId, setEditId] = useState<number | null>(null);
+  const [editId, setEditId] = useState<string | null>(null);
 
   useEffect(() => { load(); }, [load]);
 
@@ -34,7 +34,7 @@ export default function BookmarkWidget() {
     setShowForm(false);
   };
 
-  const startEdit = (id: number, t: string, u: string) => {
+  const startEdit = (id: string, t: string, u: string) => {
     setEditId(id);
     setTitle(t);
     setUrl(u);

@@ -3,7 +3,7 @@ import { Plus, Trash2, Check } from 'lucide-react';
 import { useTodoStore } from '../stores/useTodoStore';
 import { formatDistanceToNow, isPast, isToday } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
-import type { Todo } from '../lib/db';
+import type { Todo } from '../stores/useTodoStore';
 
 const PRIORITY_CONFIG = {
   high:   { label: '高', color: '#FF3B30', bg: '#FFF1F0' },
@@ -13,7 +13,7 @@ const PRIORITY_CONFIG = {
 
 const PRESET_TAGS = ['工作', '学习', '生活'];
 
-function CountdownBadge({ dueDate }: { dueDate?: Date }) {
+function CountdownBadge({ dueDate }: { dueDate?: Date | null }) {
   if (!dueDate) return null;
   const due = new Date(dueDate);
   const overdue = isPast(due) && !isToday(due);
@@ -41,7 +41,7 @@ export default function TodoWidget() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [dueDate, setDueDate] = useState('');
   const [showForm, setShowForm] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleAdd = async () => {
@@ -50,7 +50,6 @@ export default function TodoWidget() {
       title: input.trim(),
       priority,
       dueDate: dueDate ? new Date(dueDate) : undefined,
-      tags: selectedTags,
       isCompleted: false,
     });
     setInput('');
@@ -170,10 +169,10 @@ export default function TodoWidget() {
           <TodoItem
             key={todo.id}
             todo={todo}
-            onToggle={() => toggle(todo.id!)}
-            onDelete={() => setDeleteConfirm(todo.id!)}
+            onToggle={() => toggle(todo.id)}
+            onDelete={() => setDeleteConfirm(todo.id)}
             deleteConfirm={deleteConfirm === todo.id}
-            onConfirmDelete={() => { remove(todo.id!); setDeleteConfirm(null); }}
+            onConfirmDelete={() => { remove(todo.id); setDeleteConfirm(null); }}
             onCancelDelete={() => setDeleteConfirm(null)}
           />
         ))}
@@ -187,10 +186,10 @@ export default function TodoWidget() {
               <TodoItem
                 key={todo.id}
                 todo={todo}
-                onToggle={() => toggle(todo.id!)}
-                onDelete={() => remove(todo.id!)}
+                onToggle={() => toggle(todo.id)}
+                onDelete={() => remove(todo.id)}
                 deleteConfirm={false}
-                onConfirmDelete={() => remove(todo.id!)}
+                onConfirmDelete={() => remove(todo.id)}
                 onCancelDelete={() => {}}
               />
             ))}
@@ -248,14 +247,6 @@ function TodoItem({
           />
         </div>
         <div className="flex items-center gap-1 flex-wrap mt-0.5">
-          {todo.tags.map((tag) => (
-            <span
-              key={tag}
-              style={{ fontSize: 10, color: '#8E8E93', background: '#F2F2F7', borderRadius: 4, padding: '1px 5px' }}
-            >
-              {tag}
-            </span>
-          ))}
           <CountdownBadge dueDate={todo.dueDate} />
         </div>
       </div>
