@@ -37,7 +37,11 @@ export const useTodoStore = create<TodoStore>((set, get) => ({
       .from('todos')
       .select('*')
       .order('created_at', { ascending: false });
-    if (!error && data) set({ todos: data.map(toTodo) });
+    if (error) {
+      console.error('[TodoStore] load failed:', error.message);
+      return;
+    }
+    if (data) set({ todos: data.map(toTodo) });
   },
 
   add: async (todo) => {
@@ -51,7 +55,8 @@ export const useTodoStore = create<TodoStore>((set, get) => ({
       })
       .select()
       .single();
-    if (!error && data) set((s) => ({ todos: [toTodo(data), ...s.todos] }));
+    if (error) { console.error('[TodoStore] add failed:', error.message); return; }
+    if (data) set((s) => ({ todos: [toTodo(data), ...s.todos] }));
   },
 
   update: async (id, changes) => {

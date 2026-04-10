@@ -28,9 +28,9 @@ export default function CalendarWidget() {
 
   // todos 直接读取共享 store，由 App.tsx 统一加载，此处不重复 loadTodos
   const { todos } = useTodoStore();
-  const { events, load: loadEvents, add: addEvent, remove: removeEvent } = useCalendarStore();
+  const { events, add: addEvent, remove: removeEvent } = useCalendarStore();
 
-  useEffect(() => { loadEvents(); }, [loadEvents]);
+  // load 由 App.tsx 统一调用
 
   // 点击 panel 外部时关闭
   useEffect(() => {

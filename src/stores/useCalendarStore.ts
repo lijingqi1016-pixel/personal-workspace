@@ -32,7 +32,8 @@ export const useCalendarStore = create<CalendarStore>((set) => ({
       .from('events')
       .select('*')
       .order('created_at', { ascending: false });
-    if (!error && data) set({ events: data.map(toEvent) });
+    if (error) { console.error('[CalendarStore] load failed:', error.message); return; }
+    if (data) set({ events: data.map(toEvent) });
   },
 
   add: async (event) => {

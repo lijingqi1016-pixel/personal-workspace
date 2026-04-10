@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Plus, X, ExternalLink, Pencil } from 'lucide-react';
 import { useBookmarkStore } from '../stores/useBookmarkStore';
 
@@ -12,13 +12,13 @@ function getFavicon(url: string) {
 }
 
 export default function BookmarkWidget() {
-  const { bookmarks, load, add, remove, update } = useBookmarkStore();
+  const { bookmarks, add, remove, update } = useBookmarkStore();
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [editId, setEditId] = useState<string | null>(null);
 
-  useEffect(() => { load(); }, [load]);
+  // load 由 App.tsx 统一调用
 
   const handleSubmit = async () => {
     const cleanUrl = url.startsWith('http') ? url : `https://${url}`;

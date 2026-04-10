@@ -31,7 +31,8 @@ export const useBookmarkStore = create<BookmarkStore>((set) => ({
       .from('bookmarks')
       .select('*')
       .order('created_at', { ascending: true });
-    if (!error && data) set({ bookmarks: data.map(toBookmark) });
+    if (error) { console.error('[BookmarkStore] load failed:', error.message); return; }
+    if (data) set({ bookmarks: data.map(toBookmark) });
   },
 
   add: async (item) => {
