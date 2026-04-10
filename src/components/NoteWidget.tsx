@@ -1,53 +1,96 @@
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { useCreateBlockNote } from '@blocknote/react';
 import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/mantine/style.css';
-import { db } from '../lib/db';
+import { supabase } from '../lib/supabase';
 
-const NOTE_ID = 1; // 单篇备忘录
+// 固定使用同一条笔记记录（单篇备忘录）
+const NOTE_SLUG = 'main';
 
 export default function NoteWidget() {
   const editor = useCreateBlockNote();
   const [loaded, setLoaded] = useState(false);
-  const saveTimer = useCallback(() => {
-    let t: ReturnType<typeof setTimeout>;
-    return (fn: () => void) => { clearTimeout(t); t = setTimeout(fn, 600); };
-  }, [])();
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
+  const noteIdRef = useRef<string | null>(null);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // 初始化：从 Dexie 读取内容
+  // ── 初始化：从 Supabase 读取备忘录内容 ──
   useEffect(() => {
     (async () => {
-      const note = await db.notes.get(NOTE_ID);
-      if (note?.content) {
-        try {
-          const blocks = JSON.parse(note.content);
-          await editor.replaceBlocks(editor.document, blocks);
-        } catch (_) {}
+      const { data, error } = await supabase
+        .from('notes')
+        .select('*')
+        .eq('title', NOTE_SLUG)
+        .maybeSingle();
+
+      if (error) {
+        console.error('[NoteWidget] load failed:', error.message);
+        setLoaded(true);
+        return;
       }
+
+      if (data) {
+        noteIdRef.current = data.id;
+        if (data.content) {
+          try {
+            const blocks = JSON.parse(data.content);
+            await editor.replaceBlocks(editor.document, blocks);
+          } catch (_) { /* 内容格式错误时静默跳过，从空白开始 */ }
+        }
+      } else {
+        // 首次使用，创建记录
+        const { data: created, error: createErr } = await supabase
+          .from('notes')
+          .insert({ title: NOTE_SLUG, content: '' })
+          .select()
+          .single();
+        if (!createErr && created) noteIdRef.current = created.id;
+      }
+
       setLoaded(true);
     })();
-  }, [editor]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // 自动保存
+  // ── 防抖自动保存（600ms 无操作后写入 Supabase）──
   const handleChange = useCallback(() => {
     if (!loaded) return;
-    saveTimer(async () => {
+    setSaveStatus('saving');
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(async () => {
       const content = JSON.stringify(editor.document);
-      const existing = await db.notes.get(NOTE_ID);
-      if (existing) {
-        await db.notes.update(NOTE_ID, { content, updatedAt: new Date() });
-      } else {
-        await db.notes.add({ id: NOTE_ID, content, updatedAt: new Date() });
-      }
-    });
-  }, [editor, loaded, saveTimer]);
+      const id = noteIdRef.current;
+      if (!id) return;
+
+      const { error } = await supabase
+        .from('notes')
+        .update({ content, updated_at: new Date().toISOString() })
+        .eq('id', id);
+
+      setSaveStatus(error ? 'error' : 'saved');
+      if (error) console.error('[NoteWidget] save failed:', error.message);
+    }, 600);
+  }, [editor, loaded]);
+
+  const statusText = {
+    saved: '已同步',
+    saving: '保存中…',
+    error: '保存失败',
+  };
+  const statusColor = {
+    saved: '#C7C7CC',
+    saving: '#FFCC00',
+    error: '#FF3B30',
+  };
 
   return (
     <div className="card flex flex-col h-full" style={{ minHeight: 340 }}>
       {/* 标题 */}
       <div className="flex items-center justify-between mb-3">
         <h2 style={{ fontSize: 15, fontWeight: 600, color: '#1C1C1E' }}>临时备忘录</h2>
-        <span style={{ fontSize: 10, color: '#C7C7CC' }}>自动保存</span>
+        <span style={{ fontSize: 10, color: statusColor[saveStatus], transition: 'color 0.3s' }}>
+          {statusText[saveStatus]}
+        </span>
       </div>
 
       {/* 编辑器区域 */}
