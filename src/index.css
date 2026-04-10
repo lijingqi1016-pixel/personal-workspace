@@ -14,18 +14,64 @@ body {
   background-color: #F5F5F7;
   font-family: -apple-system, BlinkMacSystemFont, Helvetica Neue, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
+  /* 防止移动端横向溢出 */
+  overflow-x: hidden;
 }
 
 #root { width: 100%; min-height: 100vh; }
 
+/* ── 页面容器：移动端小内边距，桌面端大内边距 ── */
+.workspace-bg {
+  min-height: 100vh;
+  background: #F5F5F7;
+  padding: 20px 16px 32px;
+  box-sizing: border-box;
+}
+@media (min-width: 768px) {
+  .workspace-bg { padding: 28px 32px 40px; }
+}
+@media (min-width: 1280px) {
+  .workspace-bg { padding: 32px 40px 48px; }
+}
+
+/* ── Header ── */
+.workspace-header { margin-bottom: 20px; }
+@media (min-width: 768px) { .workspace-header { margin-bottom: 28px; } }
+
+.workspace-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1C1C1E;
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+@media (min-width: 768px) { .workspace-title { font-size: 22px; } }
+
+.workspace-date {
+  font-size: 12px;
+  color: #C7C7CC;
+  margin-top: 4px;
+}
+
+/* ── Card ── */
 .card {
   background: rgba(255,255,255,0.82);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-radius: 20px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
   border: 1px solid rgba(255,255,255,0.6);
-  padding: 24px;
+  padding: 16px;
+}
+@media (min-width: 768px) {
+  .card {
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+  }
+}
+@media (min-width: 1280px) {
+  .card { padding: 24px; }
 }
 
 ::-webkit-scrollbar { width: 4px; }

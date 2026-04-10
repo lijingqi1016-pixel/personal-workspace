@@ -22,19 +22,23 @@ export default function App() {
   }, [loadTodos, loadEvents, loadBookmarks]);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F5F5F7', padding: '32px 40px', boxSizing: 'border-box' }}>
-      <header style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: '#1C1C1E', letterSpacing: '-0.5px', margin: 0 }}>个人工作台</h1>
-        <p style={{ fontSize: 12, color: '#C7C7CC', marginTop: 4 }}>
+    <div className="workspace-bg">
+      <header className="workspace-header">
+        <h1 className="workspace-title">个人工作台</h1>
+        <p className="workspace-date">
           {new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })}
         </p>
       </header>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, marginBottom: 24, alignItems: 'stretch' }}>
+
+      {/* 顶部三栏：移动端单列 → 平板双列 → 桌面三列 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6 items-stretch">
         <TodoWidget />
         <CalendarWidget />
         <PomodoroWidget />
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 24, alignItems: 'stretch' }}>
+
+      {/* 底部：移动端单列 → 桌面 3:2 分栏 */}
+      <div className="grid grid-cols-1 xl:grid-cols-[3fr_2fr] gap-4 md:gap-6 items-stretch">
         <NoteWidget />
         <BookmarkWidget />
       </div>
